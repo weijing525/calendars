@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		.active{
+			background: #f00;
+			color: #fff;
+		}
+		td{
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+	<div id="calendars"></div>
+	<script type="text/javascript">
+		var Calendars = {
+		    calendars: document.getElementById('calendars'),
+		    month: new Date().getMonth() + 1,
+		    Init: function () {
+		        this.createEle();
+		        this.renderTable(this.month);
+		    },
+		    createEle: function () {
+		        var prev = document.createElement('button');
+		        prev.className = 'prev';
+		        prev.innerHTML = '上月';
+		        var next = document.createElement('button');
+		        next.className = 'next';
+		        next.innerHTML = '下月';
+		 
+		        var res = document.createElement('div');
+		        res.id = 'result';
+		        var msg = document.createElement('div');
+		        msg.id = 'info';
+		        var table = document.createElement('table');
+		        table.border = 1;
+		        table.id = 'table';
+		        res.appendChild(msg);
+		        res.appendChild(table);		      
+		        calendars.appendChild(prev);
+		        calendars.appendChild(next);
+		   		calendars.appendChild(res);
+		        this.HandleEvent();
+		    },
+		    renderTable: function (month) {
+		        var date = new Date();
+		        var _month = month;
+		        var orgMonth = date.getMonth() + 1;
+		        var orgYear = date.getFullYear();
+		        var _date = new Date(date.getFullYear(), month, 0);
+		        var curMonth = _date.getMonth() + 1;
+		        var year = _date.getFullYear();
+		        var today = date.getDate();
+		        var info = document.getElementById('info');
+		      	info.innerHTML = "当前" + year + "年" + curMonth + "月份";
+		        var table = document.getElementById('table');
+		        table.innerHTML = '';
+		        var thead = document.createElement('thead');
+		        var tbody = document.createElement('tbody');
+		        var thead_html = '';
+		        var tbodyHtml = '';
+		        var week = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'];
+		        var day = new Date(date.getFullYear(), month, 0);//当月最后一天
+		        var daycount = day.getDate(); //当月总天数
+		        for (var i = 0; i < week.length; i++) {
+		            thead_html += "<td>" + week[i] + "</td>";
+		        }
+		        thead.innerHTML = '<tr>' + thead_html + '</tr>'
+		 
+		        //当前月份天数
+		        var tempday = [];
+		 
+		        //上月末尾一周
+		        var lastMonth = new Date(date.getFullYear(), month - 1, 0); //上月份
+		        var lastMonthCount = lastMonth.getDate(); //上月总天数
+		        var lastmontArr = [];
+		        for (var i = 0; i < lastMonthCount; i++) {
+		            lastmontArr.push(i + 1);
+		        }
+		        var lastweek = lastmontArr.slice(lastMonthCount - 7, lastMonthCount).reverse();
+		        //找出当月一号星期几，然后将当月星期的前几天给填充上月末尾的日期
+		        var firstday = new Date(date.getFullYear(), month - 1).getDay();
+		        if (firstday == 0) {
+		            tempday = lastweek.slice(1, 8);
+		        } else {
+		            for (var i = 0; i < week.length; i++) {
+		                tempday.push(lastweek[i]);
+		                if (i == firstday) {
+		                    break;
+		                }
+		            }
+		        }
+		        tempday = tempday.reverse();
+		        //当月月总天数(算上了上月末尾天数)
+		        for (var i = 0; i < daycount; i++) {
+		            tempday.push(i + 1);
+		        }
+		 
+		        var result = [];
+		        for (var i = 1, len = tempday.length; i < len; i += 7) {
+		            //将天数按一周来分组,如果当月一号星期日,截取就减1;
+		            if (firstday == 0) {
+		                result.push(tempday.slice(i - 1, i + 6));
+		            } else {
+		                result.push(tempday.slice(i + 1, i + 8));
+		            }
+		 			
+		 			//找到该月的最后一周,如果最后一天不是星期日,就push下月的日期
+		            if (result[result.length - 1].length < 7) {
+		                var last_week_day = 7 - result[result.length - 1].length;
+		                for (var j = 0; j < last_week_day; j++) {
+		                    result[result.length - 1].push(j + 1);
+		                }
+		                result[result.length - 1] = result[result.length - 1].slice(0, 7);
+		            }
+		        }
+		 
+		 
+		        for (var i = 0; i < result.length; i++) {
+		            var listweek = result[i]; //当月星期列表
+		            var lineHtml = '';
+		            for (var j = 0; j < listweek.length; j++) {
+		                if (listweek[j] == today && orgMonth == curMonth && orgYear == year) {
+		                    lineHtml += '<td  class="active">' + listweek[j] + '</td>';
+		                } else if ((i == 0 && listweek[j] > 7) || (i == result.length - 1 && listweek[j] < 7)) {
+		                    //上月或者下月背景置灰
+		                    lineHtml += '<td style="background:#ccc;">' + listweek[j] + '</td>';
+		                } else {
+		                    lineHtml += '<td>' + listweek[j] + '</td>';
+		                }
+		            }
+		            tbodyHtml += '<tr>' + lineHtml + '</tr>'
+		        }
+		        tbody.innerHTML = tbodyHtml;
+		        table.appendChild(thead);
+		        table.appendChild(tbody);
+		    },
+		    HandleEvent: function () {
+		        var next = document.getElementsByTagName('button')[0];
+		        var prev = document.getElementsByTagName('button')[1];
+		        var _this = this;
+		        next.onclick = function () {
+		            _this.month++;
+		            _this.renderTable(_this.month);
+		        }
+		        prev.onclick = function () {
+		            _this.month--;
+		            _this.renderTable(_this.month);
+		        }
+		    }
+		}
+		Calendars.Init();
+	</script>
+
+</body>
+</html>
