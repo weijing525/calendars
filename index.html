@@ -8,6 +8,10 @@
 			background: #f00;
 			color: #fff;
 		}
+		.cur{
+			background:#039;
+			color:#fff;
+		}
 		td{
 			text-align: center;
 		}
@@ -110,11 +114,14 @@
 		 			
 		 			//找到该月的最后一周,如果最后一天不是星期日,就push下月的日期
 		            if (result[result.length - 1].length < 7) {
-		                var last_week_day = 7 - result[result.length - 1].length;
-		                for (var j = 0; j < last_week_day; j++) {
-		                    result[result.length - 1].push(j + 1);
+		                var last_week_day = result[result.length - 1].length;
+		                if(last_week_day > 0){
+		                	for (var j = 0; j < 7-last_week_day; j++) {
+		                	    result[result.length - 1].push(j + 1);
+		                	}
+		                	result[result.length - 1] = result[result.length - 1].slice(0, 7);
 		                }
-		                result[result.length - 1] = result[result.length - 1].slice(0, 7);
+		                
 		            }
 		        }
 		 
@@ -139,8 +146,8 @@
 		        table.appendChild(tbody);
 		    },
 		    HandleEvent: function () {
-		        var next = document.getElementsByTagName('button')[0];
-		        var prev = document.getElementsByTagName('button')[1];
+		        var prev = document.getElementsByTagName('button')[0];
+		        var next = document.getElementsByTagName('button')[1];
 		        var _this = this;
 		        next.onclick = function () {
 		            _this.month++;
@@ -150,6 +157,24 @@
 		            _this.month--;
 		            _this.renderTable(_this.month);
 		        }
+		    },
+		    selectDate:function(){
+		    	var tbody = document.querySelector('#table').querySelector('tbody');
+		    	var tr = tbody.getElementsByTagName('tr');
+				for(var i = 0;i<tr.length;i++){
+					var td = tr[i].getElementsByTagName('td');
+					(function(i){
+						for(var j = 0;j<td.length;j++){
+							(function(j){
+								td[j].onclick = function(){
+									var target = tr[i].getElementsByTagName('td');
+									target[j].className = 'cur';
+								}
+							})(j)
+						}
+					})(i)
+					
+				}		    	
 		    }
 		}
 		Calendars.Init();
